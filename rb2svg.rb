@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
 # coding: utf-8
+# Copyright 2016 pixie-grasper
 
 require 'fileutils'
-load 'a.rb'
+
+load ARGV.length >= 1 ? ARGV[0] : 'a.rb'
 
 $cff_fonts.each_pair do |fontname, font|
   dirname = fontname.to_s + '.d'

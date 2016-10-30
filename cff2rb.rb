@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# coding: utf-8
+# Copyright 2016 pixie-grasper
 
 require 'getoptlong.rb'
 
