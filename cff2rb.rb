@@ -530,7 +530,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
       @cx = 0
       @cy = 0
       last_moveto = nil
-      width = @private_dict.nominalWidthX
+      width = nil
       data_stack_has_cleared = false
       loop do
         it = job[ip]
@@ -540,7 +540,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
             # 4.1 Path Construction Operators
             when :rmoveto
               if not data_stack_has_cleared and data_stack.length > 2 then
-                width += data_stack.shift
+                width = @private_dict.nominalWidthX + data_stack.shift
               end
               closepath last_moveto
               @cx += data_stack.shift
@@ -550,7 +550,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
               data_stack_has_cleared = true
             when :hmoveto
               if not data_stack_has_cleared and data_stack.length > 1 then
-                width += data_stack.shift
+                width = @private_dict.nominalWidthX + data_stack.shift
               end
               closepath last_moveto
               @cx += data_stack.shift
@@ -559,7 +559,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
               data_stack_has_cleared = true
             when :vmoveto
               if not data_stack_has_cleared and data_stack.length > 1 then
-                width += data_stack.shift
+                width = @private_dict.nominalWidthX + data_stack.shift
               end
               closepath last_moveto
               @cy += data_stack.shift
@@ -752,7 +752,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
             # 4.2 Operator for Finishing a Path
             when :endchar
               if not data_stack_has_cleared and data_stack.length > 0 then
-                width += data_stack.shift
+                width = @private_dict.nominalWidthX + data_stack.shift
               end
               closepath last_moveto
               data_stack_has_cleared = true
@@ -760,37 +760,37 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
             # 4.3 Hint Operators
             when :hstem # FIXME
               if not data_stack_has_cleared and data_stack.length > 0 then
-                width += data_stack.shift
+                width = @private_dict.nominalWidthX + data_stack.shift
               end
               data_stack_has_cleared = true
               data_stack.clear
             when :vstem # FIXME
               if not data_stack_has_cleared and data_stack.length > 0 then
-                width += data_stack.shift
+                width = @private_dict.nominalWidthX + data_stack.shift
               end
               data_stack_has_cleared = true
               data_stack.clear
             when :hstemhm # FIXME
               if not data_stack_has_cleared and data_stack.length > 0 then
-                width += data_stack.shift
+                width = @private_dict.nominalWidthX + data_stack.shift
               end
               data_stack_has_cleared = true
               data_stack.clear
             when :vstemhm # FIXME
               if not data_stack_has_cleared and data_stack.length > 0 then
-                width += data_stack.shift
+                width = @private_dict.nominalWidthX + data_stack.shift
               end
               data_stack_has_cleared = true
               data_stack.clear
             when :hintmask # FIXME
               if not data_stack_has_cleared and data_stack.length > 0 then
-                width += data_stack.shift
+                width = @private_dict.nominalWidthX + data_stack.shift
               end
               data_stack_has_cleared = true
               data_stack.clear
             when :contrmask # FIXME
               if not data_stack_has_cleared and data_stack.length > 0 then
-                width += data_stack.shift
+                width = @private_dict.nominalWidthX + data_stack.shift
               end
               data_stack_has_cleared = true
               data_stack.clear
@@ -937,7 +937,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
       end
       return {
         :id => @id,
-        :width => width,
+        :width => width || @private_dict.defaultWidthX,
         :commands => @history
       }.to_s
     end
