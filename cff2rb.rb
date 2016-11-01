@@ -134,7 +134,7 @@ glyphs = {}
     EOC
     @glyphs.each_pair do |id, glyph|
       ret << <<-EOC
-glyphs[:#{@string_index[id].gsub(/\./, '_')}_#{id}] = #{Render.new(glyph, @private_dict, @subroutines_index || [], @global_subroutines_index).to_s}
+glyphs[:#{@string_index[id].gsub(/\./, '_')}] = #{Render.new(id, glyph, @private_dict, @subroutines_index || [], @global_subroutines_index).to_s}
       EOC
     end
     ret << <<-EOC
@@ -496,7 +496,8 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`|]/, '
   end
 
   class Render
-    def initialize(glyph, priv_dict, subroutines_index, global_subroutines_index)
+    def initialize(id, glyph, priv_dict, subroutines_index, global_subroutines_index)
+      @id = id
       @glyph = glyph
       @private_dict = priv_dict
       @subroutines_index = subroutines_index
@@ -935,6 +936,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`|]/, '
         # raise "broken glyph detected."
       end
       return {
+        :id => @id,
         :width => width,
         :commands => @history
       }.to_s
