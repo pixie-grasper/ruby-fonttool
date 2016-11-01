@@ -61,28 +61,6 @@ def convert_cffs_to_ruby(filenames)
 unless defined? CFF
   CFF = :defined
 
-  class CFFGlyph
-    def initialize
-      @commands = []
-    end
-
-    def <<(command)
-      @commands << command
-    end
-
-    def to_a
-      @commands
-    end
-  end
-
-  class CFFFont
-    attr_accessor :glyphs
-
-    def initialize
-      @glyphs = []
-    end
-  end
-
   $cff_fonts = {}
 end
 
