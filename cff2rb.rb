@@ -140,7 +140,7 @@ glyphs[:#{@string_index[id].gsub(/\./, '_')}] = #{Render.new(id, glyph, @private
     ret << <<-EOC
 ##
 
-$cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`|]/, '_').to_sym}] = {
+$cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, '_').to_sym}] = {
   :glyphs => glyphs,
   :parameters => {
     :bbox => #{@top_dict.FontBBox}
