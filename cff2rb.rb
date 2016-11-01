@@ -993,7 +993,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
   #         Appendix A
   @@standard_strings = %w/
     .notdef space exclam quotedbl numbersign dollar percent ampersand quoteright parenleft
-    parenright asterisk plus comma hyphen period slash zero one to
+    parenright asterisk plus comma hyphen period slash zero one two
     three four five six seven eight nine colon semicolon less
     equal greater question at A B C D E F
     G H I J K L M N O P
