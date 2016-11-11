@@ -19,7 +19,9 @@ Usage: cff2rb [command]... fontfile.cff...
   exit
 end
 
+# Main function
 def main
+  # After this function is called, parse ARGV on GetoptLong.
   options = {}
   begin
     GetoptLong.new.set_options(
@@ -31,18 +33,25 @@ def main
   rescue GetoptLong::Error
     usage
   end
+
+  # If not extra arguments exists, output usage and exit.
   if ARGV.length == 0 then
     usage
   end
+
+  # If not --output argument exists, use $default_output_file_name as output file name.
   if not options.member? :o then
     options[:o] = $default_output_file_name
   end
+
+  # If output file exists and --force option omitted, output error and exit.
   if File.exists? options[:o] and not options.member? :f then
     puts "output file #{options[:o]} exists"
     puts 'do nothing'
     exit
   end
 
+  # After run GetoptLong#each_option, input file names in arguments only are still in the ARGV.
   begin
     ruby = convert_cffs_to_ruby ARGV
     File.new(options[:o], 'w').write ruby
@@ -54,6 +63,7 @@ def main
 end
 
 def convert_cffs_to_ruby(filenames)
+  # First, set up output string below.
   ret = <<-EOC
 #!/usr/bin/env ruby
 # coding: utf-8
@@ -65,6 +75,10 @@ unless defined? CFF
 end
 
   EOC
+
+  # Note 1. String#puts! are defined after below.
+  # Note 2. The `convert_cffs_to_ruby' function returns instance of CFF
+  #         and this class has a to_s method.
   filenames.each do |filename|
     ret.puts! convert_cff_to_ruby filename
   end
@@ -92,28 +106,62 @@ class String
   end
 end
 
+# To get more details of the CFF-format, see the Technical Note #5176 ``The Compact Font Format Specification''.
 class CFF
+  # file: instance of File
   def initialize(file)
     @source = file
     file.autoclose = true
+
+    # First, seek to the `body' on the file.
+    # Note. CFF-formatted *file* is a container of the CFF-formatted *data*.
     seek_file
     data_begin = file.pos
+
+    # Next, Read the Header because binary data begins with it.
+    # Header.hdrSize field indicates beginning of the Name-INDEX structure,
+    # and I have assumeed that is a 4.
     header = read_header
+
+    # Next, read the Name-INDEX structure.
     name_index = read_INDEX
+
+    # Next, read the Top-DICT-INDEX;
+    # An INDEX structure is a array-oid container and the Top-DICT-INDEX INDEX contains an Top-DICT.
+    # The DICT structure is a sequence of commands.
     @top_dict = TopDICT.new read_INDEX[0]
+
+    # Next, read the String-INDEX;
+    # The String-INDEX is a table of the strings.
+    # It contains font-name, font-family, glyph-names, and so on.
+    # The @@standard_strings is a standard table and the read INDEX does not contain the standard table.
     @string_index = @@standard_strings + read_INDEX
+
+    # Next, read the Global-Subrs-INDEX.
+    # Surprisingly, CFF-formatted font/glyphs is one of the program
+    # and `glyph's are able to call global/local subroutines to stroke frequently required lines.
     @global_subroutines_index = read_INDEX.map { |command|
       parse command.to_a
     }
+
+    # Next, read the CharStrings-INDEX.
+    # It contains commands of the strokes of glyphs.
     file.seek data_begin + @top_dict.CharStrings
     char_strings_index = read_INDEX
+
+    # Next, read the Charsets structure.
     file.seek data_begin + @top_dict.charset
     charsets = read_charsets char_strings_index.length
+
+    # Then, parse commands of each glyph.
     @glyphs = {}
     for i in 0 ... char_strings_index.length do
       raise "broken file detected." if @glyphs.member? charsets[i]
       @glyphs[charsets[i]] = parse char_strings_index[i].to_a
     end
+
+    # Finally, read the Private-DICT structure and Local-Subrs-INDEX if they exists.
+    # The Private-DICT structure contains offset to the Local-Subrs-INDEX.
     if @top_dict.Private then
       file.seek data_begin + @top_dict.Private[1]
       @private_dict = PrivateDICT.new file.read @top_dict.Private[0]
