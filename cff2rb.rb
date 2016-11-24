@@ -121,10 +121,10 @@ class CFF
     # Next, Read the Header because binary data begins with it.
     # Header.hdrSize field indicates beginning of the Name-INDEX structure,
     # and I have assumeed that is a 4.
-    header = read_header
+    read_header
 
     # Next, read the Name-INDEX structure.
-    name_index = read_INDEX
+    read_INDEX
 
     # Next, read the Top-DICT-INDEX;
     # An INDEX structure is a array-oid container and the Top-DICT-INDEX INDEX contains an Top-DICT.
@@ -660,7 +660,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
               assert data_stack_has_cleared
               assert data_stack.length % 6 == 0
               data_stack.each_slice 6 do |d|
-                curveto *d
+                curveto(*d)
               end
               data_stack.clear
             when :hhcurveto
@@ -718,7 +718,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
               assert data_stack.length >= 8
               assert data_stack.length % 6 != 2
               data_stack[0 ... -2].each_slice 6 do |d|
-                curveto *d
+                curveto(*d)
               end
               lineto data_stack[-2], data_stack[-1]
               data_stack.clear
@@ -727,9 +727,9 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
               assert data_stack.length >= 8
               assert data_stack.length % 6 != 2
               data_stack[0 ... -6].each_slice 2 do |d|
-                lineto *d
+                lineto(*d)
               end
-              curveto *data_stack[-6 .. -1]
+              curveto(*data_stack[-6 .. -1])
               data_stack.clear
             when :vhcurveto
               assert data_stack_has_cleared
@@ -1156,7 +1156,7 @@ $cff_fonts[:#{@string_index[@top_dict.FullName].gsub(/[-!"\#$&'*+,.:;=?@^`| ]/, 
 
   def read_Offset(size)
     offset = 0
-    for i in 1 .. size do
+    (1 .. size).each do
       offset = offset * 256 + read_byte
     end
     return offset
